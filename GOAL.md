@@ -1,4 +1,4 @@
-# Visionox Standards Tool — Original Goal / Requirements
+# Standards Tool — Original Goal / Requirements
 
 > Source: Roger, 2026-06-01 (Discord thread 1510836104406892658). This is the canonical north-star for the "Visionox Webtool" priority. The current deployed tool is a partial slice (a document-scaffold generator); the full goal has two larger pillars below.
 

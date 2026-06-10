@@ -1,4 +1,4 @@
-# Visionox Standards Tool (vstd) · 维信诺标准工具
+# Standards Tool (vstd) · 标准工具
 
 **GB/T 1.1-2020 标准文本起草助手 — 结构脚手架 + LLM 逐条款内容评审**
 **GB/T 1.1-2020 standard-drafting assistant — structural scaffold + LLM per-clause content review**
