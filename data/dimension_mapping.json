@@ -1,0 +1,168 @@
+{
+  "version": "1.0",
+  "source_file": "20260105维信诺标准工作清单（外部门）.xlsx",
+  "source_rows": 83,
+  "source_doc": "phase0-source-structure.md",
+  "decided_by": "Paw+Rex, 2026-06-01",
+  "note": "Maps the 5 portfolio-analysis dimensions to the real spreadsheet columns. See phase0-source-structure.md for full column structure and data caveats.",
+
+  "dimensions": [
+    {
+      "id": "lixiang_niandai",
+      "name_zh": "立项年代",
+      "name_en": "Filing Year / Era",
+      "source_column": "F",
+      "source_column_header": "立项时间",
+      "description": "Year the standard project was initiated. Bucketed by year; group by decade where useful for visualization.",
+      "data_type": "year",
+      "observed_range": "2009-2026",
+      "grouping_suggestion": "by_decade_or_year",
+      "normalization_note": "Date formats are inconsistent (2014/4/24, 2014年2月, 2025/06月) -- normalize to YYYY before grouping. Treat missing date as unknown.",
+      "values_example": ["2009", "2014", "2019", "2022", "2026"],
+      "decade_buckets": ["2000s (2009)", "2010s (2010-2019)", "2020s (2020-2026)"]
+    },
+    {
+      "id": "gongsi_juesei",
+      "name_zh": "公司类别/角色",
+      "name_en": "Company Category / Role",
+      "source_column": "I+J",
+      "source_column_header": "主导单位 + 参与单位",
+      "description": "Whether Visionox-group is leading, participating, or absent. Category derived from which companies appear in col I (lead) and col J (participants).",
+      "data_type": "categorical",
+      "role_dimension": {
+        "lead": "col I 主导单位",
+        "participant": "col J 参与单位 (multi-value cell, split on delimiters)"
+      },
+      "category_values": [
+        {
+          "value": "visionox_lead",
+          "label_zh": "维信诺主导",
+          "label_en": "Visionox-group (lead)",
+          "match_rule": "col I contains 维信诺 or 国显光电 (Q/320583)"
+        },
+        {
+          "value": "visionox_participant",
+          "label_zh": "维信诺参与",
+          "label_en": "Visionox-group (participant only)",
+          "match_rule": "col J contains 维信诺/国显光电 but col I does not"
+        },
+        {
+          "value": "other_vendor",
+          "label_zh": "其他厂商",
+          "label_en": "Other vendor (non-Visionox lead)",
+          "match_rule": "col I is TCL华星/京东方/天马/OPPO/etc. and col J does not include Visionox"
+        },
+        {
+          "value": "academia",
+          "label_zh": "高校/院所",
+          "label_en": "Academia / research institute",
+          "match_rule": "col I contains 清华大学/大学/研究院/etc."
+        }
+      ],
+      "split_note": "参与单位 is a multi-company cell. Split on common delimiters: 、, ,, ;, slash. After split, classify each participating company."
+    },
+    {
+      "id": "biaozhun_cengji",
+      "name_zh": "标准层级",
+      "name_en": "Standard Level / Hierarchy",
+      "source_column": "B",
+      "source_column_header": "标准类型",
+      "description": "The administrative level of the standard in the Chinese standardization hierarchy. 7 levels observed.",
+      "data_type": "ordered_categorical",
+      "hierarchy_order": "international > military > national > industry > local > group > enterprise",
+      "values": [
+        {
+          "value": "international",
+          "label_zh": "国际标准",
+          "label_en": "International standard",
+          "examples": ["IEC 62341-6-1:2009"],
+          "prefix": ["IEC", "ISO", "ISO/IEC"]
+        },
+        {
+          "value": "military",
+          "label_zh": "国军标(GJB)",
+          "label_en": "National military standard (GJB)",
+          "examples": ["GJB XXXX"],
+          "prefix": ["GJB"]
+        },
+        {
+          "value": "national",
+          "label_zh": "国家标准",
+          "label_en": "National standard (GB/T or GB)",
+          "examples": ["GB/T 38001.11-2020"],
+          "prefix": ["GB/T", "GB"]
+        },
+        {
+          "value": "industry",
+          "label_zh": "行业标准",
+          "label_en": "Industry standard",
+          "examples": ["SJ/T 11461.x"],
+          "prefix": ["SJ/T", "YD/T", "HJ"]
+        },
+        {
+          "value": "local",
+          "label_zh": "地方标准",
+          "label_en": "Local/provincial standard",
+          "examples": ["DB32/T"],
+          "prefix": ["DB"]
+        },
+        {
+          "value": "group",
+          "label_zh": "团体标准",
+          "label_en": "Group/association standard",
+          "examples": ["T/CVIA"],
+          "prefix": ["T/"]
+        },
+        {
+          "value": "enterprise",
+          "label_zh": "企业标准",
+          "label_en": "Enterprise standard",
+          "examples": ["Q/HDVXN", "Q/320583"],
+          "prefix": ["Q/"]
+        }
+      ],
+      "key_note": "序号 re-numbers within each 标准类型 block. Use (标准类型, 序号) or 标准号 as unique key, not 序号 alone."
+    },
+    {
+      "id": "biaozhun_zhuangtai",
+      "name_zh": "标准状态",
+      "name_en": "Standard Status",
+      "source_column": "E",
+      "source_column_header": "标准状态",
+      "description": "Current lifecycle status of the standard. Maturity dimension from in-progress to published.",
+      "data_type": "ordered_categorical",
+      "maturity_order": "立项 < 立项通过 < 征求意见 < 报批 < 公开 < 发布",
+      "values": [
+        {"value": "lixiang", "label_zh": "立项", "label_en": "Project initiated"},
+        {"value": "lixiang_tongguo", "label_zh": "立项通过", "label_en": "Project approved"},
+        {"value": "zhengqiu_yijian", "label_zh": "征求意见", "label_en": "Comment solicitation"},
+        {"value": "baopi", "label_zh": "报批", "label_en": "Submitted for approval"},
+        {"value": "gongkai", "label_zh": "公开", "label_en": "Publicly released"},
+        {"value": "fabu", "label_zh": "发布", "label_en": "Published"}
+      ]
+    },
+    {
+      "id": "guikou_zuzhi",
+      "name_zh": "归口组织",
+      "name_en": "Issuing / Oversight Organization",
+      "source_column": "K",
+      "source_column_header": "标准组织/归口",
+      "description": "The technical committee or organization responsible for the standard. Determines the domain and oversight chain.",
+      "data_type": "categorical",
+      "values_observed": [
+        {"value": "iec_tc110", "label": "IEC TC110", "scope": "Flat panel display devices"},
+        {"value": "iec_tc547", "label": "IEC TC547", "scope": "Flexible/organic devices (formerly TC86)"},
+        {"value": "zhuang_zongbu", "label": "总装备部", "scope": "Military/defense equipment"},
+        {"value": "xinbiao_wei", "label": "全国信标委", "scope": "National IT standardization (SAC/TC 28)"},
+        {"value": "suzhou_guangdian", "label": "苏州市光电产业商会", "scope": "Suzhou optoelectronics industry association"},
+        {"value": "zgc_banddaoti", "label": "中关村半导体照明联盟", "scope": "Zhongguancun SSL alliance"},
+        {"value": "dianzi_shixiang", "label": "中国电子视像行业协会", "scope": "China video industry association (CVIA)"},
+        {"value": "dianzi_cailiao", "label": "中国电子材料行业协会", "scope": "China electronic materials industry association"}
+      ],
+      "note": "Directly derived from col K. Some standards may have no归口 entry -- classify as unknown."
+    }
+  ],
+
+  "key_field_for_uniqueness": "Use (标准类型, 序号) or 标准号 as the unique row key. 序号 alone is NOT unique -- it restarts per 标准类型 block.",
+  "data_ingestion_note": "Source xlsx is DRM-encrypted via DingTalk. Only screen-capture / manual transcription is available until a clean export is provided. 83 rows verified from 4 screenshots."
+}

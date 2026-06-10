@@ -1,0 +1,22 @@
+{
+  "name": "vstd",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "docx": "^9.5.0",
+    "mammoth": "^1.8.0",
+    "pdfjs-dist": "^4.9.155",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "vite": "^6.3.5",
+    "wrangler": "^4.95.0"
+  }
+}

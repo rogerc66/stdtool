@@ -1,0 +1,44 @@
+flowchart TD
+  Landing["Landing.jsx 首页 / SPA page-state"]
+  Landing -->|Open Upload Review| Review["Review.jsx 审查"]
+  Landing -->|Open Composer| Composer["Composer.jsx 生成器"]
+
+  %% Review path
+  Review --> Upload["上传草稿 .docx / .md / .txt<br/>.pdf / .doc 建设中"]
+  Upload --> Fmt{"格式?"}
+  Fmt -->|docx| Mammoth["mammoth 转 HTML<br/>parseHtmlSections"]
+  Fmt -->|md| PMd["parseMdSections"]
+  Fmt -->|txt| PTxt["parseTxtSections"]
+  Mammoth --> Struct
+  PMd --> Struct
+  PTxt --> Struct
+  Struct["checkConformance 结构合规 phase0<br/>对照 STRUCTURES gbt11 / isoiec"]
+  Struct --> SOut["结构结果 缺失必备要素 + 顺序违规<br/>即时 本地 离线"]
+  SOut --> Toggle{"Content Review LLM 开关?"}
+  Toggle -->|关 默认| Done1["只显示结构结果"]
+  Toggle -->|开| Extract["extractClauses 逐条款<br/>clause_id title body<br/>跳过 规范性引用 和 符号"]
+  Extract --> Post["POST /api/review<br/>standard clauses structural"]
+
+  %% Pages Function + Workers AI
+  Post --> API["functions/api/review.js<br/>onRequestPost  CF Pages Function"]
+  API --> Resolve["resolveStandard 归一化标签<br/>GB/T 1.1-2020 或 ISO 未知则 GB/T"]
+  Resolve --> Loop["逐条款 最多10 调用 env.AI.run"]
+  Loop --> Model["MODEL_PRIORITY Workers AI<br/>qwen2.5-coder-32b 然后 qwq-32b 然后 deepseek-r1"]
+  Model --> Cls{"classifyAiError"}
+  Cls -->|code 3036 10k neurons| Quota["quota_exceeded<br/>reset_at 次日 00:00 UTC"]
+  Cls -->|code 3040 capacity 429| Rate["rate_limited 重试约60s"]
+  Cls -->|ok| Json["extractJson 平衡括号<br/>getResponseText 字符串或对象<br/>去除 think 块"]
+  Json --> Issues["逐条款 issues<br/>rule problem severity 高中低 suggestion<br/>规则 应宜可 含糊词 验证 编号 附录"]
+  Issues --> Render
+  Quota --> Render
+  Rate --> Render
+  Render["Review.jsx 渲染<br/>结构结果 + 逐条款问题 + 严重度徽章<br/>限额提示 / AI失败优雅降级回结构检查"]
+
+  %% Composer path
+  Composer --> Form["GB/T 1.1-2020 要素表单 按强制顺序"]
+  Form --> Gen["generator.js loadStructure + generateMarkdown"]
+  Gen --> Export["导出 Markdown + .docx"]
+
+  %% infra
+  Render -.-> Infra["纯静态 Preact SPA · Vite · Cloudflare Pages<br/>内容评审 Pages Function + Workers AI binding 无key"]
+  Export -.-> Infra
